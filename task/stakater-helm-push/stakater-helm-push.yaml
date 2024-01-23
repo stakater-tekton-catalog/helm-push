@@ -5,7 +5,7 @@ kind: Task
 metadata:
   name: stakater-helm-push
   labels:
-    app.kubernetes.io/version: "0.0.16"
+    app.kubernetes.io/version: "0.0.17"
 spec:
   description: >-
     helm-push installs helm push, increase version based on tag (if main)
@@ -46,7 +46,7 @@ spec:
           name: $(params.HELM_REG_CREDS_SECRET_NAME)  
           key: username
           optional: true
-    image: stakater/pipeline-toolbox:v0.0.36
+    image: ghcr.io/stakater/pipeline-toolbox:v0.0.37
     name: helm-package
     command: ["/bin/bash"]
     workingDir: $(workspaces.source.path)
