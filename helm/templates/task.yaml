@@ -53,12 +53,18 @@ spec:
       - |
           set -e
           if [ $(params.PR_NUMBER) == "NA" ]; then
-             VERSION=$(inputs.params.SEM_VER)
-             CHART_PACKAGE="$(helm package --version $VERSION -u $(params.CHART_PATH) | cut -d":" -f2 | tr -d '[:space:]')"
-             echo Uploading $CHART_PACKAGE to $(params.REGISTRY)
-             curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE"
-           echo "Helm chart successfully pushed"
+            VERSION=$(inputs.params.SEM_VER)
+            CHART_PACKAGE="$(helm package --version $VERSION -u $(params.CHART_PATH) | cut -d":" -f2 | tr -d '[:space:]')"
+            echo Uploading $CHART_PACKAGE to $(params.REGISTRY)
+             
+            if [ $(params.INSECURE_UPLOAD) == "true"]; then
+              curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE" --insecure
+            else
+              curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE" 
+            fi
+            echo "Helm chart successfully pushed"
           else
-              echo "Its a PR"
+            echo "Its a PR"
           fi
+
         
