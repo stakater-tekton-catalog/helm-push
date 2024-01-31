@@ -62,7 +62,7 @@ spec:
              CHART_PACKAGE="$(helm package --version $VERSION -u $(params.CHART_PATH) | cut -d":" -f2 | tr -d '[:space:]')"
              echo Uploading $CHART_PACKAGE to $(params.REGISTRY)
              
-             if [ $(params.INSECURE_UPLOAD) == "true"]; then
+             if [ $(params.INSECURE_UPLOAD) == "true" ]; then
                 curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE" --insecure
              else
                 curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE" 
