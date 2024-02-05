@@ -15,7 +15,7 @@ spec:
   params:
     - name: CUSTOM_CA_PATH
       type: string
-      default: false
+      default: ""
       description: path to the custom ca 
     - name: CHART_PATH
       type: string
