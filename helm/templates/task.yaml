@@ -17,6 +17,7 @@ spec:
       description: Path to the helmchart relative to workingDir
     - name: REGISTRY
       type: string
+      default: "NA"
     - name: PR_NUMBER
       type: string
       default: NA
