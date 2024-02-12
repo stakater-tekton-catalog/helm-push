@@ -5,7 +5,7 @@ kind: Task
 metadata:
   name: stakater-helm-push
   labels:
-    app.kubernetes.io/version: "0.0.17"
+    app.kubernetes.io/version: "0.0.18"
 spec:
   description: >-
     helm-push installs helm push, increase version based on tag (if main)
@@ -13,16 +13,13 @@ spec:
     file in a pre checked out helm repository in the *source* workspace and push
     the packed chart to the chartmuseum defined in *registry*
   params:
-    - name: CUSTOM_CA_PATH
-      type: string
-      default: ""
-      description: path to the custom ca 
     - name: CHART_PATH
       type: string
       default: deploy
       description: Path to the helmchart relative to workingDir
     - name: REGISTRY
       type: string
+      default: "NA"
     - name: PR_NUMBER
       type: string
       default: NA
@@ -50,6 +47,12 @@ spec:
           name: $(params.HELM_REG_CREDS_SECRET_NAME)  
           key: username
           optional: true
+    - name: REG_URL
+      valueFrom:
+        secretKeyRef:
+          name: $(params.HELM_REG_CREDS_SECRET_NAME)
+          key: url
+          optional: true
     image: ghcr.io/stakater/pipeline-toolbox:v0.0.37
     name: helm-package
     command: ["/bin/bash"]
@@ -57,18 +60,18 @@ spec:
     args:
       - -c
       - |
-        set -e
-        if [ $(params.PR_NUMBER) == "NA" ]; then
-            VERSION=$(inputs.params.SEM_VER)
-            CHART_PACKAGE="$(helm package --version $VERSION -u $(params.CHART_PATH) | cut -d":" -f2 | tr -d '[:space:]')"
-            echo Uploading $CHART_PACKAGE to $(params.REGISTRY)
-            
-            if [ $(params.CUSTOM_CA_PATH) != "" ]; then
-              curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE" --cacert $(params.CUSTOM_CA_PATH)
-            else
-              curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE" 
-            fi
-          echo "Helm chart successfully pushed"
-        else
-            echo "Its a PR"
-        fi
+          set -e
+          if [ $(params.PR_NUMBER) == "NA" ]; then
+             VERSION=$(inputs.params.SEM_VER)
+             CHART_PACKAGE="$(helm package --version $VERSION -u $(params.CHART_PATH) | cut -d":" -f2 | tr -d '[:space:]')"
+             if [ $(params.REGISTRY) != "NA" ]; then
+               echo Uploading $CHART_PACKAGE to $(params.REGISTRY)
+               curl -u "${REG_USER}":"${REG_PASSWORD}" $(params.REGISTRY) --upload-file "$CHART_PACKAGE"        
+             else
+                echo Uploading $CHART_PACKAGE to "${REG_URL}"
+                curl -u "${REG_USER}":"${REG_PASSWORD}" ${REG_URL} --upload-file "$CHART_PACKAGE"        
+             fi
+             echo "Helm chart successfully pushed"
+          else
+              echo "Its a PR"
+          fi
