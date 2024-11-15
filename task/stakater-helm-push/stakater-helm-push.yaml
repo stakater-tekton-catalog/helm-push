@@ -5,7 +5,7 @@ kind: Task
 metadata:
   name: stakater-helm-push
   labels:
-    app.kubernetes.io/version: "0.0.18"
+    app.kubernetes.io/version: "0.0.19"
 spec:
   description: >-
     helm-push installs helm push, increase version based on tag (if main)
